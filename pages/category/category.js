@@ -1,4 +1,5 @@
 // pages/category/category.js - 分类页
+const app = getApp();
 const request = require('../../utils/request.js');
 const config = require('../../utils/config.js');
 
@@ -7,6 +8,8 @@ Page({
     categories: [],
     activeCategoryId: null,
     shops: [],
+    lat: 31.4912,
+    lng: 120.3119,
     loadingCategories: true,
     loadingShops: false,
     errorMsg: '',
@@ -14,7 +17,43 @@ Page({
   },
 
   onLoad: function () {
-    this.loadCategories();
+    this.initLocationAndLoad();
+  },
+
+  initLocationAndLoad: function () {
+    var that = this;
+    return this.resolveUserLocation()
+      .catch(function () {
+        return null;
+      })
+      .finally(function () {
+        that.loadCategories();
+      });
+  },
+
+  resolveUserLocation: function () {
+    var that = this;
+    return new Promise(function (resolve, reject) {
+      wx.getLocation({
+        type: 'gcj02',
+        success: function (res) {
+          var lat = Number(res.latitude);
+          var lng = Number(res.longitude);
+          app.globalData.userLocation = { lat: lat, lng: lng };
+          that.setData({ lat: lat, lng: lng });
+          resolve(res);
+        },
+        fail: function (err) {
+          var fallback = app.globalData.userLocation || {};
+          if (fallback.lat && fallback.lng) {
+            that.setData({ lat: fallback.lat, lng: fallback.lng });
+            resolve(fallback);
+            return;
+          }
+          reject(err);
+        }
+      });
+    });
   },
 
   loadCategories: function () {
@@ -64,7 +103,11 @@ Page({
     });
 
     request
-      .get(config.API.SHOPS + '/category/' + categoryId)
+      .get(config.API.SHOPS + '/category/' + categoryId, {
+        lat: that.data.lat,
+        lng: that.data.lng,
+        radiusMeters: 5000
+      })
       .then(function (data) {
         that.setData({
           shops: that.normalizeShops(data),

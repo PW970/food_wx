@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.Map;
  */
 @Service
 public class TencentMapService {
+
+    private static final Logger log = LoggerFactory.getLogger(TencentMapService.class);
 
     private static final int DEFAULT_RADIUS = 5000;
     private static final int DEFAULT_PAGE_SIZE = 20;
@@ -38,17 +42,29 @@ public class TencentMapService {
     /**
      * 检索用户附近的餐饮 POI。
      */
-    @SuppressWarnings("unchecked")
     public List<TencentNearbyPlace> searchNearbyFoodPlaces(Double lat, Double lng, int radiusMeters) {
+        return searchFoodPlaces("美食", lat, lng, radiusMeters);
+    }
+
+    /**
+     * 按关键词检索用户附近餐饮 POI。
+     */
+    public List<TencentNearbyPlace> searchFoodPlacesByKeyword(String keyword, Double lat, Double lng, int radiusMeters) {
+        return searchFoodPlaces(keyword, lat, lng, radiusMeters);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<TencentNearbyPlace> searchFoodPlaces(String keyword, Double lat, Double lng, int radiusMeters) {
         if (!isEnabled() || lat == null || lng == null) {
             return List.of();
         }
 
         int safeRadius = radiusMeters > 0 ? radiusMeters : DEFAULT_RADIUS;
+        String safeKeyword = (keyword == null || keyword.isBlank()) ? "美食" : keyword.trim();
         String url = UriComponentsBuilder
                 .fromHttpUrl(baseUrl + "/ws/place/v1/search")
                 .queryParam("key", key)
-                .queryParam("keyword", "美食")
+                .queryParam("keyword", safeKeyword)
                 .queryParam("orderby", "_distance")
                 .queryParam("page_size", DEFAULT_PAGE_SIZE)
                 .queryParam("boundary", String.format("nearby(%s,%s,%d)", lat, lng, safeRadius))
@@ -65,6 +81,7 @@ public class TencentMapService {
 
             Object status = body.get("status");
             if (!(status instanceof Number) || ((Number) status).intValue() != 0) {
+                log.warn("Tencent map POI search failed, status={}, message={}", status, body.get("message"));
                 return List.of();
             }
 
@@ -79,19 +96,30 @@ public class TencentMapService {
                     continue;
                 }
 
+                String poiId = asString(firstNonNull(map.get("id"), map.get("_id")));
                 String title = asString(map.get("title"));
                 String address = asString(map.get("address"));
                 String category = asString(map.get("category"));
+                String phone = asString(firstNonNull(map.get("tel"), map.get("phone")));
                 Double distance = asDouble(map.get("_distance"));
+                Double placeLat = null;
+                Double placeLng = null;
+
+                Object location = map.get("location");
+                if (location instanceof Map<?, ?> locationMap) {
+                    placeLat = asDouble(locationMap.get("lat"));
+                    placeLng = asDouble(locationMap.get("lng"));
+                }
 
                 if (title == null || title.isBlank()) {
                     continue;
                 }
 
-                places.add(new TencentNearbyPlace(title, address, category, distance));
+                places.add(new TencentNearbyPlace(poiId, title, address, category, placeLat, placeLng, phone, distance));
             }
             return places;
         } catch (Exception ex) {
+            log.warn("Tencent map POI search request failed", ex);
             return List.of();
         }
     }
@@ -112,5 +140,9 @@ public class TencentMapService {
         } catch (NumberFormatException ex) {
             return null;
         }
+    }
+
+    private Object firstNonNull(Object first, Object second) {
+        return first != null ? first : second;
     }
 }

@@ -12,8 +12,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TencentNearbyPlace {
 
+    private String poiId;
     private String title;
     private String address;
     private String category;
+    private Double latitude;
+    private Double longitude;
+    private String phone;
     private Double distanceMeters;
 }

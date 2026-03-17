@@ -60,8 +60,17 @@ public class Shop {
     @Column(name = "category_id")
     private Long categoryId;
 
+    @Column(name = "external_poi_id", length = 100, unique = true)
+    private String externalPoiId;
+
+    @Column(name = "data_source", length = 30)
+    private String dataSource;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "last_synced_at")
+    private LocalDateTime lastSyncedAt;
 
     @PrePersist
     protected void onCreate() {
@@ -74,6 +83,12 @@ public class Shop {
         }
         if (status == null) {
             status = "OPEN";
+        }
+        if (dataSource == null) {
+            dataSource = "LOCAL";
+        }
+        if (lastSyncedAt == null) {
+            lastSyncedAt = LocalDateTime.now();
         }
     }
 }

@@ -9,6 +9,7 @@ import com.foodrecommendation.repository.ReviewRepository;
 import com.foodrecommendation.repository.ShopRepository;
 import com.foodrecommendation.repository.ShopTagRepository;
 import com.foodrecommendation.service.RecommendationService;
+import com.foodrecommendation.service.ShopService;
 import com.foodrecommendation.utils.GeoUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,6 +82,9 @@ public class RecommendationServiceImpl implements RecommendationService {
     @Autowired
     private TencentMapService tencentMapService;
 
+    @Autowired
+    private ShopService shopService;
+
     /**
      * 缓存全平台平均评分
      */
@@ -99,8 +103,11 @@ public class RecommendationServiceImpl implements RecommendationService {
         // 2. 获取用户偏好标签权重
         Map<String, Double> userPreferenceWeights = getUserPreferenceWeights(userId);
 
-        // 3. 获取所有店铺
-        List<Shop> allShops = shopRepository.findAll();
+        // 3. 优先获取同步后的真实 POI 店铺
+        List<Shop> allShops = shopService.getRealShops(userLat, userLon, 5000);
+        if (allShops == null || allShops.isEmpty()) {
+            allShops = shopRepository.findAll();
+        }
 
         // 额外获取用户附近的真实餐饮 POI，用于增强位置命中和距离表现
         List<TencentNearbyPlace> nearbyPlaces = tencentMapService.searchNearbyFoodPlaces(userLat, userLon, 5000);

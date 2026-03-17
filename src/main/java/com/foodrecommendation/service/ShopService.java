@@ -1,6 +1,5 @@
 package com.foodrecommendation.service;
 
-import com.foodrecommendation.entity.Category;
 import com.foodrecommendation.entity.Shop;
 import com.foodrecommendation.vo.ShopVO;
 import java.util.List;
@@ -17,6 +16,11 @@ public interface ShopService {
     List<Shop> getAllShops();
 
     /**
+     * 获取腾讯地图同步后的真实 POI 店铺列表。
+     */
+    List<Shop> getRealShops(Double lat, Double lng, Integer radiusMeters);
+
+    /**
      * 根据ID获取店铺
      * @param id 店铺ID
      * @return 店铺
@@ -31,11 +35,21 @@ public interface ShopService {
     List<Shop> getShopsByCategoryId(Long categoryId);
 
     /**
+     * 根据分类和位置获取真实 POI 店铺列表。
+     */
+    List<Shop> getRealShopsByCategoryId(Long categoryId, Double lat, Double lng, Integer radiusMeters);
+
+    /**
      * 根据关键词搜索店铺（模糊查询）
      * @param keyword 关键词
      * @return 店铺列表
      */
     List<Shop> searchShopsByName(String keyword);
+
+    /**
+     * 按关键词和位置搜索真实 POI 店铺。
+     */
+    List<Shop> searchRealShopsByKeyword(String keyword, Double lat, Double lng, Integer radiusMeters);
 
     /**
      * 获取店铺VO列表（支持排序）

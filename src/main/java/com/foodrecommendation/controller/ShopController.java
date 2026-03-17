@@ -27,12 +27,18 @@ public class ShopController {
      * @return 店铺VO列表
      */
     @GetMapping("")
-    public Result<List<ShopVO>> getAllShops(@RequestParam(required = false) String sort) {
+    public Result<List<ShopVO>> getAllShops(@RequestParam(required = false) String sort,
+                                            @RequestParam(required = false) Double lat,
+                                            @RequestParam(required = false) Double lng,
+                                            @RequestParam(required = false) Integer radiusMeters) {
         List<ShopVO> shops;
         if (sort != null && !sort.isEmpty()) {
             shops = shopService.getShopsWithSort(sort);
         } else {
-            List<Shop> shopList = shopService.getAllShops();
+            List<Shop> shopList = shopService.getRealShops(lat, lng, radiusMeters);
+            if (shopList.isEmpty()) {
+                shopList = shopService.getAllShops();
+            }
             shops = shopList.stream()
                     .map(shop -> shopService.getShopVOById(shop.getId(), null))
                     .collect(java.util.stream.Collectors.toList());
@@ -47,8 +53,14 @@ public class ShopController {
      * @return 店铺VO列表
      */
     @GetMapping("/category/{categoryId}")
-    public Result<List<ShopVO>> getShopsByCategoryId(@PathVariable Long categoryId) {
-        List<Shop> shops = shopService.getShopsByCategoryId(categoryId);
+    public Result<List<ShopVO>> getShopsByCategoryId(@PathVariable Long categoryId,
+                                                     @RequestParam(required = false) Double lat,
+                                                     @RequestParam(required = false) Double lng,
+                                                     @RequestParam(required = false) Integer radiusMeters) {
+        List<Shop> shops = shopService.getRealShopsByCategoryId(categoryId, lat, lng, radiusMeters);
+        if (shops.isEmpty()) {
+            shops = shopService.getShopsByCategoryId(categoryId);
+        }
         List<ShopVO> shopVOs = shops.stream()
                 .map(shop -> shopService.getShopVOById(shop.getId(), null))
                 .collect(java.util.stream.Collectors.toList());
@@ -62,11 +74,17 @@ public class ShopController {
      * @return 店铺VO列表
      */
     @GetMapping("/search")
-    public Result<List<ShopVO>> searchShops(@RequestParam(required = false, defaultValue = "") String keyword) {
+    public Result<List<ShopVO>> searchShops(@RequestParam(required = false, defaultValue = "") String keyword,
+                                            @RequestParam(required = false) Double lat,
+                                            @RequestParam(required = false) Double lng,
+                                            @RequestParam(required = false) Integer radiusMeters) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return Result.success(List.of());
         }
-        List<Shop> shops = shopService.searchShopsByName(keyword);
+        List<Shop> shops = shopService.searchRealShopsByKeyword(keyword, lat, lng, radiusMeters);
+        if (shops.isEmpty()) {
+            shops = shopService.searchShopsByName(keyword);
+        }
         List<ShopVO> shopVOs = shops.stream()
                 .map(shop -> shopService.getShopVOById(shop.getId(), null))
                 .collect(java.util.stream.Collectors.toList());
