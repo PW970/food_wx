@@ -2,6 +2,7 @@ package com.foodrecommendation.service.impl;
 
 import com.foodrecommendation.dto.ReviewRequest;
 import com.foodrecommendation.entity.Review;
+import com.foodrecommendation.entity.Shop;
 import com.foodrecommendation.entity.User;
 import com.foodrecommendation.repository.ReviewRepository;
 import com.foodrecommendation.repository.ShopRepository;
@@ -40,6 +41,18 @@ public class ReviewServiceImpl implements ReviewService {
         List<Review> reviews = reviewRepository.findByShopId(shopId);
         return reviews.stream()
                 .map(this::convertToVO)
+                .sorted((r1, r2) -> {
+                    if (r1.getCreatedAt() == null && r2.getCreatedAt() == null) {
+                        return Long.compare(r2.getId(), r1.getId());
+                    }
+                    if (r1.getCreatedAt() == null) {
+                        return 1;
+                    }
+                    if (r2.getCreatedAt() == null) {
+                        return -1;
+                    }
+                    return r2.getCreatedAt().compareTo(r1.getCreatedAt());
+                })
                 .collect(Collectors.toList());
     }
 
@@ -48,6 +61,18 @@ public class ReviewServiceImpl implements ReviewService {
         List<Review> reviews = reviewRepository.findByUserId(userId);
         return reviews.stream()
                 .map(this::convertToVO)
+                .sorted((r1, r2) -> {
+                    if (r1.getCreatedAt() == null && r2.getCreatedAt() == null) {
+                        return Long.compare(r2.getId(), r1.getId());
+                    }
+                    if (r1.getCreatedAt() == null) {
+                        return 1;
+                    }
+                    if (r2.getCreatedAt() == null) {
+                        return -1;
+                    }
+                    return r2.getCreatedAt().compareTo(r1.getCreatedAt());
+                })
                 .collect(Collectors.toList());
     }
 
@@ -79,7 +104,7 @@ public class ReviewServiceImpl implements ReviewService {
         review.setUserId(request.getUserId());
         review.setShopId(request.getShopId());
         review.setRating(request.getRating());
-        review.setContent(request.getContent());
+        review.setContent(request.getContent() != null ? request.getContent().trim() : "");
         Review savedReview = reviewRepository.save(review);
 
         // 同步更新店铺评分和评论数
@@ -113,6 +138,12 @@ public class ReviewServiceImpl implements ReviewService {
         vo.setContent(review.getContent());
         vo.setCreatedAt(review.getCreatedAt());
 
+        Shop shop = shopRepository.findById(review.getShopId()).orElse(null);
+        if (shop != null) {
+            vo.setShopName(shop.getName());
+            vo.setShopCoverImage(shop.getCoverImage());
+        }
+
         // 查询用户信息
         if (review.getUserId() != null) {
             User user = userRepository.findById(review.getUserId()).orElse(null);
@@ -120,6 +151,13 @@ public class ReviewServiceImpl implements ReviewService {
                 vo.setNickname(user.getNickname());
                 vo.setAvatar(user.getAvatar());
             }
+        }
+
+        if (vo.getNickname() == null || vo.getNickname().isBlank()) {
+            vo.setNickname("匿名用户");
+        }
+        if (vo.getAvatar() == null || vo.getAvatar().isBlank()) {
+            vo.setAvatar("https://picsum.photos/seed/default-avatar/120");
         }
 
         return vo;

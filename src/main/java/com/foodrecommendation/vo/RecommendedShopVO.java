@@ -40,6 +40,16 @@ public class RecommendedShopVO {
     private List<String> tags;
 
     /**
+     * 店铺纬度
+     */
+    private Double latitude;
+
+    /**
+     * 店铺经度
+     */
+    private Double longitude;
+
+    /**
      * 原始评分
      */
     private Double originalScore;

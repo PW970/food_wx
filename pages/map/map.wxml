@@ -1,0 +1,74 @@
+<view class="page">
+  <map
+    id="foodMap"
+    class="food-map"
+    longitude="{{lng}}"
+    latitude="{{lat}}"
+    scale="{{scale}}"
+    markers="{{markers}}"
+    show-location="true"
+    enable-3D="false"
+    enable-overlooking="false"
+    enable-zoom="true"
+    enable-scroll="true"
+    bindmarkertap="onMarkerTap"
+    bindcallouttap="onMarkerTap"
+  ></map>
+
+  <view class="map-toolbar">
+    <view class="toolbar-btn" bindtap="onRelocate">定位</view>
+    <view class="toolbar-btn strong" bindtap="onRefreshTap">刷新</view>
+  </view>
+
+  <view class="sheet">
+    <view class="sheet-head">
+      <view>
+        <text class="sheet-title">地图推荐</text>
+        <text class="sheet-subtitle">点击地图标记可查看店铺详情</text>
+      </view>
+      <text class="sheet-count">{{shops.length}} 家</text>
+    </view>
+
+    <view wx:if="{{loading}}" class="state">
+      <view class="spinner"></view>
+      <text class="state-text">正在加载附近推荐...</text>
+    </view>
+
+    <view wx:elif="{{errorMsg}}" class="state">
+      <text class="state-text">{{errorMsg}}</text>
+      <view class="retry-btn" bindtap="onRefreshTap">重试</view>
+    </view>
+
+    <scroll-view wx:else scroll-y="true" class="shop-scroll">
+      <view
+        class="shop-card {{selectedShopId === item.shopId ? 'active' : ''}}"
+        wx:for="{{shops}}"
+        wx:key="shopId"
+        data-shop-id="{{item.shopId}}"
+        bindtap="onShopCardTap"
+      >
+        <image class="shop-image" src="{{item.coverImage}}" mode="aspectFill"></image>
+        <view class="shop-copy">
+          <view class="shop-top">
+            <text class="shop-name">{{item.shopName}}</text>
+            <view class="shop-score">
+              <text>★</text>
+              <text>{{item.score}}</text>
+            </view>
+          </view>
+          <text class="shop-meta">{{item.categoryName}} · {{item.distance}}</text>
+          <text class="shop-reason">{{item.recommendReason}}</text>
+          <view class="shop-tags" wx:if="{{item.tags.length > 0}}">
+            <view class="tag" wx:for="{{item.tags}}" wx:key="index">
+              <text>{{item}}</text>
+            </view>
+          </view>
+          <view class="card-actions">
+            <view class="action-btn secondary" data-shop-id="{{item.shopId}}" bindtap="onFocusShopTap">地图定位</view>
+            <view class="action-btn" data-shop-id="{{item.shopId}}" bindtap="onGoDetail">查看详情</view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</view>

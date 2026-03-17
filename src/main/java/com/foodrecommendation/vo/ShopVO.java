@@ -35,6 +35,11 @@ public class ShopVO {
     private LocalDateTime createdAt;
 
     /**
+     * 收藏时间
+     */
+    private LocalDateTime collectedAt;
+
+    /**
      * 店铺标签列表
      */
     private List<String> tags;

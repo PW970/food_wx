@@ -46,7 +46,7 @@ public class RecommendationController {
      * @param limit 返回结果数量（非必填，默认10）
      * @return 推荐店铺VO列表
      */
-    @GetMapping
+    @GetMapping("")
     public Result<List<RecommendedShopVO>> getRecommendations(
             @RequestParam Long userId,
             @RequestParam Double lat,
@@ -106,6 +106,8 @@ public class RecommendationController {
 
         // 设置封面图片
         vo.setCoverImage(shop.getCoverImage());
+        vo.setLatitude(shop.getLatitude());
+        vo.setLongitude(shop.getLongitude());
 
         // 设置分类名称
         if (shop.getCategoryId() != null) {

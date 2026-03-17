@@ -23,7 +23,7 @@ public class CategoryController {
      * 获取所有分类列表
      * GET /api/categories
      */
-    @GetMapping
+    @GetMapping("")
     public Result<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();
         return Result.success(categories);

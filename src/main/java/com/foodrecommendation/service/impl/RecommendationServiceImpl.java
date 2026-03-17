@@ -2,6 +2,8 @@ package com.foodrecommendation.service.impl;
 
 import com.foodrecommendation.entity.Shop;
 import com.foodrecommendation.entity.ShopTag;
+import com.foodrecommendation.integration.TencentMapService;
+import com.foodrecommendation.integration.TencentNearbyPlace;
 import com.foodrecommendation.repository.CollectionRepository;
 import com.foodrecommendation.repository.ReviewRepository;
 import com.foodrecommendation.repository.ShopRepository;
@@ -44,6 +46,26 @@ public class RecommendationServiceImpl implements RecommendationService {
      */
     private static final double PREFERENCE_WEIGHT = 0.2;
 
+    /**
+     * 腾讯地图附近真实 POI 命中权重
+     */
+    private static final double MAP_RELEVANCE_WEIGHT = 0.15;
+
+    /**
+     * 重新平衡后的贝叶斯权重
+     */
+    private static final double ENHANCED_BAYESIAN_WEIGHT = 0.4;
+
+    /**
+     * 重新平衡后的距离权重
+     */
+    private static final double ENHANCED_DISTANCE_WEIGHT = 0.25;
+
+    /**
+     * 重新平衡后的偏好权重
+     */
+    private static final double ENHANCED_PREFERENCE_WEIGHT = 0.2;
+
     @Autowired
     private ShopRepository shopRepository;
 
@@ -55,6 +77,9 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Autowired
     private ShopTagRepository shopTagRepository;
+
+    @Autowired
+    private TencentMapService tencentMapService;
 
     /**
      * 缓存全平台平均评分
@@ -76,6 +101,9 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         // 3. 获取所有店铺
         List<Shop> allShops = shopRepository.findAll();
+
+        // 额外获取用户附近的真实餐饮 POI，用于增强位置命中和距离表现
+        List<TencentNearbyPlace> nearbyPlaces = tencentMapService.searchNearbyFoodPlaces(userLat, userLon, 5000);
 
         // 处理空店铺列表的情况
         if (allShops == null || allShops.isEmpty()) {
@@ -105,18 +133,27 @@ public class RecommendationServiceImpl implements RecommendationService {
                 distanceScore = GeoUtils.calculateDistanceScore(distanceKm);
             }
 
+            // ============ 步骤2.5: 计算腾讯地图附近命中度 ============
+            TencentNearbyPlace matchedPlace = matchNearbyPlace(shop, nearbyPlaces);
+            double mapRelevanceScore = calculateMapRelevanceScore(shop, matchedPlace);
+            if (matchedPlace != null && matchedPlace.getDistanceMeters() != null) {
+                distanceKm = matchedPlace.getDistanceMeters() / 1000.0;
+                distanceScore = GeoUtils.calculateDistanceScore(distanceKm);
+            }
+
             // ============ 步骤3: 计算偏好评分 ============
             double preferenceScore = calculatePreferenceScore(shop, userPreferenceWeights);
 
             // ============ 步骤4: 计算总推荐分数 ============
-            double totalScore = BAYESIAN_WEIGHT * bayesianScore
-                    + DISTANCE_WEIGHT * distanceScore
-                    + PREFERENCE_WEIGHT * preferenceScore;
+            double totalScore = ENHANCED_BAYESIAN_WEIGHT * bayesianScore
+                    + ENHANCED_DISTANCE_WEIGHT * distanceScore
+                    + ENHANCED_PREFERENCE_WEIGHT * preferenceScore
+                    + MAP_RELEVANCE_WEIGHT * mapRelevanceScore;
 
             // ============ 步骤5: 生成推荐解释 ============
             String recommendReason = generateRecommendReason(
-                    bayesianScore, distanceScore, preferenceScore,
-                    shop.getScore(), distanceKm, userPreferenceWeights, shop.getId()
+                    bayesianScore, distanceScore, preferenceScore, mapRelevanceScore,
+                    shop.getScore(), distanceKm, userPreferenceWeights, shop, matchedPlace
             );
 
             // 构建结果
@@ -129,6 +166,7 @@ public class RecommendationServiceImpl implements RecommendationService {
             result.put("bayesianScore", Math.round(bayesianScore * 100.0) / 100.0);
             result.put("distanceScore", Math.round(distanceScore * 100.0) / 100.0);
             result.put("preferenceScore", Math.round(preferenceScore * 100.0) / 100.0);
+            result.put("mapRelevanceScore", Math.round(mapRelevanceScore * 100.0) / 100.0);
             result.put("distanceKm", distanceKm == Double.MAX_VALUE ? null : distanceKm);
             result.put("recommendReason", recommendReason);
 
@@ -151,6 +189,86 @@ public class RecommendationServiceImpl implements RecommendationService {
         }
 
         return recommendations;
+    }
+
+    /**
+     * 将本地店铺与腾讯地图附近 POI 做轻量匹配。
+     */
+    private TencentNearbyPlace matchNearbyPlace(Shop shop, List<TencentNearbyPlace> nearbyPlaces) {
+        if (nearbyPlaces == null || nearbyPlaces.isEmpty() || shop == null) {
+            return null;
+        }
+
+        String normalizedShopName = normalizeText(shop.getName());
+        String normalizedCategory = normalizeText(shop.getCategory());
+        TencentNearbyPlace bestPlace = null;
+        double bestScore = 0.0;
+
+        for (TencentNearbyPlace place : nearbyPlaces) {
+            String normalizedTitle = normalizeText(place.getTitle());
+            String normalizedAddress = normalizeText(place.getAddress());
+            String normalizedPlaceCategory = normalizeText(place.getCategory());
+
+            double score = 0.0;
+            if (!normalizedShopName.isEmpty() &&
+                    (normalizedTitle.contains(normalizedShopName) || normalizedShopName.contains(normalizedTitle))) {
+                score += 0.75;
+            }
+            if (!normalizedCategory.isEmpty() && normalizedPlaceCategory.contains(normalizedCategory)) {
+                score += 0.2;
+            }
+            if (!normalizedCategory.isEmpty() && normalizedAddress.contains(normalizedCategory)) {
+                score += 0.05;
+            }
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestPlace = place;
+            }
+        }
+
+        return bestScore >= 0.7 ? bestPlace : null;
+    }
+
+    private double calculateMapRelevanceScore(Shop shop, TencentNearbyPlace matchedPlace) {
+        if (shop == null || matchedPlace == null) {
+            return 0.0;
+        }
+
+        String normalizedShopName = normalizeText(shop.getName());
+        String normalizedTitle = normalizeText(matchedPlace.getTitle());
+        String normalizedCategory = normalizeText(shop.getCategory());
+        String normalizedPlaceCategory = normalizeText(matchedPlace.getCategory());
+
+        double nameScore = 0.0;
+        if (!normalizedShopName.isEmpty() &&
+                (normalizedTitle.contains(normalizedShopName) || normalizedShopName.contains(normalizedTitle))) {
+            nameScore = 1.0;
+        }
+
+        double categoryScore = 0.0;
+        if (!normalizedCategory.isEmpty() && normalizedPlaceCategory.contains(normalizedCategory)) {
+            categoryScore = 1.0;
+        }
+
+        double distanceScore = 0.0;
+        if (matchedPlace.getDistanceMeters() != null) {
+            distanceScore = GeoUtils.calculateDistanceScore(matchedPlace.getDistanceMeters() / 1000.0);
+        }
+
+        return Math.min(nameScore * 0.65 + categoryScore * 0.15 + distanceScore * 0.2, 1.0);
+    }
+
+    private String normalizeText(String text) {
+        if (text == null) {
+            return "";
+        }
+        return text.replaceAll("[\\s()（）·\\-_,，。/]", "")
+                .replace("餐厅", "")
+                .replace("饭店", "")
+                .replace("美食", "")
+                .replace("店", "")
+                .toLowerCase(Locale.ROOT);
     }
 
     @Override
@@ -330,12 +448,15 @@ public class RecommendationServiceImpl implements RecommendationService {
      * @return 推荐解释文本
      */
     private String generateRecommendReason(double bayesianScore, double distanceScore,
-                                           double preferenceScore, Double originalScore,
-                                           double distanceKm, Map<String, Double> userPreferences,
-                                           Long shopId) {
+                                           double preferenceScore, double mapRelevanceScore,
+                                           Double originalScore, double distanceKm,
+                                           Map<String, Double> userPreferences,
+                                           Shop shop, TencentNearbyPlace matchedPlace) {
         // 确定最高得分的项
         String highestFactor;
-        if (bayesianScore >= distanceScore && bayesianScore >= preferenceScore) {
+        if (mapRelevanceScore >= bayesianScore && mapRelevanceScore >= distanceScore && mapRelevanceScore >= preferenceScore) {
+            highestFactor = "map";
+        } else if (bayesianScore >= distanceScore && bayesianScore >= preferenceScore) {
             highestFactor = "bayesian";
         } else if (distanceScore >= bayesianScore && distanceScore >= preferenceScore) {
             highestFactor = "distance";
@@ -345,6 +466,14 @@ public class RecommendationServiceImpl implements RecommendationService {
 
         // 根据最高得分的项生成解释
         switch (highestFactor) {
+            case "map":
+                if (matchedPlace != null && matchedPlace.getDistanceMeters() != null) {
+                    return String.format("腾讯地图显示附近 %.1fkm 内可找到相近门店", matchedPlace.getDistanceMeters() / 1000.0);
+                }
+                return shop != null && shop.getCategory() != null
+                        ? String.format("腾讯地图附近餐饮分布对「%s」品类更友好", shop.getCategory())
+                        : "腾讯地图附近餐饮命中度较高";
+
             case "bayesian":
                 // 基于评分生成的解释
                 if (originalScore != null && originalScore >= 4.5) {

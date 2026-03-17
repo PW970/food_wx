@@ -1,0 +1,52 @@
+<!-- pages/favorites/favorites.wxml - 我的收藏 -->
+<view class="page">
+  <view wx:if="{{loading}}" class="state">
+    <view class="spinner"></view>
+    <text class="state-text">加载中...</text>
+  </view>
+
+  <view wx:elif="{{errorMsg}}" class="state">
+    <text class="state-text">{{errorMsg}}</text>
+  </view>
+
+  <view wx:elif="{{shops.length === 0}}" class="state">
+    <text class="state-text">暂无收藏</text>
+  </view>
+
+  <scroll-view wx:else scroll-y="true" class="list">
+    <view
+      class="card"
+      wx:for="{{shops}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onShopTap"
+    >
+      <image class="cover" src="{{item.coverImage}}" mode="aspectFill"></image>
+      <view class="info">
+        <view class="top">
+          <text class="name">{{item.name}}</text>
+          <view class="score-wrap">
+            <text class="star">⭐</text>
+            <text class="score">{{item.score}}</text>
+          </view>
+        </view>
+        <view class="mid">
+          <text class="category">{{item.categoryName}}</text>
+          <text wx:if="{{item.perCapita}}" class="per">人均 ¥{{item.perCapita}}</text>
+        </view>
+        <view wx:if="{{item.address}}" class="address">
+          <text>{{item.address}}</text>
+        </view>
+        <view wx:if="{{item.tags.length > 0}}" class="tags">
+          <view class="tag" wx:for="{{item.tags}}" wx:key="index">
+            <text>{{item}}</text>
+          </view>
+        </view>
+        <view class="bottom-row">
+          <text class="collected-time" wx:if="{{item.collectedAt}}">收藏于 {{item.collectedAt}}</text>
+          <view class="cancel-btn" data-id="{{item.id}}" catchtap="onCancelCollect">取消收藏</view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

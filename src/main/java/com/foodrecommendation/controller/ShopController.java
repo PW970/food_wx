@@ -26,7 +26,7 @@ public class ShopController {
      * @param sort 排序方式：score(评分)、perCapita(人均)
      * @return 店铺VO列表
      */
-    @GetMapping
+    @GetMapping("")
     public Result<List<ShopVO>> getAllShops(@RequestParam(required = false) String sort) {
         List<ShopVO> shops;
         if (sort != null && !sort.isEmpty()) {

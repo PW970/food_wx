@@ -88,9 +88,21 @@ public class CollectionServiceImpl implements CollectionService {
                     if (shop == null) {
                         return null;
                     }
-                    return convertToVO(shop, true);
+                    return convertToVO(shop, collection, true);
                 })
                 .filter(vo -> vo != null)
+                .sorted((s1, s2) -> {
+                    if (s1.getCollectedAt() == null && s2.getCollectedAt() == null) {
+                        return 0;
+                    }
+                    if (s1.getCollectedAt() == null) {
+                        return 1;
+                    }
+                    if (s2.getCollectedAt() == null) {
+                        return -1;
+                    }
+                    return s2.getCollectedAt().compareTo(s1.getCollectedAt());
+                })
                 .collect(Collectors.toList());
     }
 
@@ -102,7 +114,7 @@ public class CollectionServiceImpl implements CollectionService {
     /**
      * 将Shop实体转换为ShopVO
      */
-    private ShopVO convertToVO(Shop shop, boolean isCollected) {
+    private ShopVO convertToVO(Shop shop, Collection collection, boolean isCollected) {
         ShopVO vo = new ShopVO();
         vo.setId(shop.getId());
         vo.setName(shop.getName());
@@ -120,6 +132,7 @@ public class CollectionServiceImpl implements CollectionService {
         vo.setStatus(shop.getStatus());
         vo.setCategoryId(shop.getCategoryId());
         vo.setCreatedAt(shop.getCreatedAt());
+        vo.setCollectedAt(collection != null ? collection.getCreatedAt() : null);
         vo.setIsCollected(isCollected);
 
         // 设置分类名称

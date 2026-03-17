@@ -27,7 +27,7 @@ public class ReviewController {
      * @param shopId 店铺ID
      * @return 评论VO列表
      */
-    @GetMapping
+    @GetMapping("")
     public Result<List<ReviewVO>> getReviewsByShopId(@RequestParam Long shopId) {
         List<ReviewVO> reviews = reviewService.getReviewVOsByShopId(shopId);
         return Result.success(reviews);

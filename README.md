@@ -1,244 +1,184 @@
-# Local Food Recommendation System
+# 本地美食推荐小程序
 
-美食推荐系统 - 毕业设计项目
+一个基于微信小程序 + Spring Boot + MySQL 的本地美食推荐项目，包含首页推荐、分类浏览、搜索、店铺详情、收藏、评论等完整流程。
 
-## 版本历史
+## 当前状态
 
-- **V1**: 基础版本 - 用户、店铺、评论、收藏 CRUD
-- **V2**: 功能完善版本 - 分类管理、搜索优化、评论删除
-- **V3**: 开发中...
-
-## 构建状态
-
-| 状态 | 详情 |
-|------|------|
-| 编译 | ✅ SUCCESS |
-| 测试 | ✅ SUCCESS |
-| 打包 | ✅ SUCCESS |
-| 构建时间 | 2026-03-11 |
+- 小程序主界面已完成一轮现代化 UI 优化，核心页面视觉已经统一。
+- 后端 Maven 打包已验证通过。
+- 当前本机 `127.0.0.1:3306` 没有 MySQL 服务在运行，所以后端接口暂时还不能直接启动联调。
+- 微信开发者工具 CLI 安全服务端口还没有真正打开，命令行预览暂时受限。
 
 ## 技术栈
 
-- **后端**: Java 17, Spring Boot 3, Maven
-- **数据库**: MySQL 8
-- **ORM**: Spring Data JPA
-- **其他**: Lombok
+- 小程序原生开发：`WXML`、`WXSS`、`JavaScript`
+- 后端：`Spring Boot 3.2`、`Spring Data JPA`
+- 数据库：`MySQL 8+`
+- 构建工具：`Maven`
 
 ## 项目结构
 
-```
-food_wx-1/
-├── pom.xml
-├── src/
-│   └── main/
-│       ├── java/
-│       │   └── com/
-│       │       └── foodrecommendation/
-│       │           ├── FoodRecommendationApplication.java
-│       │           ├── common/
-│       │           │   └── Result.java
-│       │           ├── config/
-│       │           ├── controller/
-│       │           │   ├── UserController.java
-│       │           │   ├── ShopController.java
-│       │           │   ├── ReviewController.java
-│       │           │   ├── CollectionController.java
-│       │           │   └── CategoryController.java
-│       │           ├── dto/
-│       │           │   ├── LoginRequest.java
-│       │           │   ├── ReviewRequest.java
-│       │           │   └── CollectionRequest.java
-│       │           ├── entity/
-│       │           │   ├── User.java
-│       │           │   ├── Shop.java
-│       │           │   ├── Review.java
-│       │           │   ├── Collection.java
-│       │           │   └── Category.java
-│       │           ├── repository/
-│       │           ├── service/
-│       │           │   └── impl/
-│       │           └── vo/
-│       │               ├── ShopVO.java
-│       │               └── ReviewVO.java
-│       └── resources/
-│           └── application.yml
-├── sql/
-│   ├── init.sql
-│   └── v2_upgrade.sql
-└── README.md
+```text
+.
+├── app.json / app.js / app.wxss
+├── pages/                  # 小程序页面
+├── utils/                  # 小程序请求与配置
+├── src/main/java/          # Spring Boot 后端
+├── src/main/resources/     # 后端配置
+├── sql/                    # 数据库脚本
+└── pom.xml
 ```
 
-## 快速开始
+## 启动步骤
 
-### 1. 准备 MySQL 数据库
+### 1. 启动 MySQL
 
-创建数据库 `fooddb`：
-
-```sql
-CREATE DATABASE fooddb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-### 2. 配置数据库连接
-
-编辑 `src/main/resources/application.yml`，确保数据库连接信息正确：
+确保本机有一个名为 `fooddb` 的数据库可用，默认配置在 [src/main/resources/application.yml](/Users/makebukepurou/Desktop/food_wx-1/src/main/resources/application.yml)：
 
 ```yaml
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/fooddb
+    url: jdbc:mysql://localhost:3306/fooddb?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
-    password: root
+    password:
 ```
 
-### 3. 启动项目
+如果你的 MySQL 有密码，记得同步修改这里的 `password`。
+
+### 2. 初始化数据库
+
+执行下面的 SQL 脚本：
+
+- [sql/init.sql](/Users/makebukepurou/Desktop/food_wx-1/sql/init.sql)
+- 如果库结构已存在但字段不完整，可再按需执行 [sql/v2_upgrade.sql](/Users/makebukepurou/Desktop/food_wx-1/sql/v2_upgrade.sql)
+
+项目启动后，后端还会通过 `DataInitializer` 自动补充一批测试数据。
+
+### 3. 启动后端
+
+在项目根目录执行：
 
 ```bash
-cd food_wx-1
 mvn spring-boot:run
 ```
 
-启动后，系统会自动：
-- 创建分类数据 (火锅、川菜、粤菜等)
-- 插入 12 条测试店铺数据
+默认启动地址：
 
-### 4. API 测试
+- 服务地址：`http://127.0.0.1:8080`
+- 推荐接口：`http://127.0.0.1:8080/api/recommendations`
 
-使用 Postman 或 curl 测试以下接口：
+### 4. 启动微信开发者工具
 
-#### 用户模块
+1. 用微信开发者工具打开项目根目录 `/Users/makebukepurou/Desktop/food_wx-1`
+2. 确认使用项目内已有的 `appid`
+3. 在「设置 -> 本地设置 / 安全设置」里确认：
+   - 已关闭或放行 `urlCheck`
+   - 已开启服务端口（如果你要使用 CLI）
 
-**模拟登录**
-- POST `http://localhost:8080/api/user/login`
-- Body (JSON):
-```json
-{
-  "nickname": "张三"
-}
+### 5. 配置小程序接口地址
+
+当前小程序请求配置在 [utils/config.js](/Users/makebukepurou/Desktop/food_wx-1/utils/config.js)：
+
+```js
+const BASE_URL = 'http://127.0.0.1:8080';
 ```
 
-**获取用户信息**
-- GET `http://localhost:8080/api/user/{id}`
+说明：
 
-#### 店铺模块
+- 开发者工具模拟器联调时，通常可以直接使用 `127.0.0.1`
+- 真机调试时，需要改成你电脑的局域网 IP，例如 `http://192.168.1.xxx:8080`
 
-**获取店铺列表**
-- GET `http://localhost:8080/api/shops`
+### 6. 配置腾讯地图增强推荐
 
-**获取店铺详情**
-- GET `http://localhost:8080/api/shops/{id}`
+项目已经接入腾讯地图 WebService 的附近地点搜索能力，用来增强现有贝叶斯推荐。
 
-**按分类查询店铺**
-- GET `http://localhost:8080/api/shops/category/{categoryId}`
-
-**搜索店铺**
-- GET `http://localhost:8080/api/shops/search?keyword=火锅`
-
-#### 分类模块
-
-**获取所有分类**
-- GET `http://localhost:8080/api/categories`
-
-#### 评论模块
-
-**获取店铺评论**
-- GET `http://localhost:8080/api/reviews?shopId=1`
-
-**获取用户评论**
-- GET `http://localhost:8080/api/reviews/user/{userId}`
-
-**发布评论**
-- POST `http://localhost:8080/api/reviews`
-- Body (JSON):
-```json
-{
-  "userId": 1,
-  "shopId": 1,
-  "rating": 5,
-  "content": "味道很好，服务也很不错！"
-}
-```
-
-**删除评论**
-- DELETE `http://localhost:8080/api/reviews/{id}`
-
-#### 收藏模块
-
-**收藏店铺**
-- POST `http://localhost:8080/api/collections`
-- Body (JSON):
-```json
-{
-  "userId": 1,
-  "shopId": 1
-}
-```
-
-**取消收藏**
-- DELETE `http://localhost:8080/api/collections?userId=1&shopId=1`
-
-**获取收藏列表**
-- GET `http://localhost:8080/api/collections?userId=1`
-
-## 响应格式
-
-所有接口返回标准 JSON 格式：
-
-```json
-{
-  "code": 200,
-  "message": "success",
-  "data": { ... }
-}
-```
-
-错误响应：
-
-```json
-{
-  "code": 400,
-  "message": "错误信息",
-  "data": null
-}
-```
-
-## V2 版本更新内容
-
-### 新增功能
-
-1. **分类管理**
-   - 支持按分类查询店铺
-   - 分类数据自动初始化
-
-2. **搜索优化**
-   - 支持空关键字搜索（返回空列表）
-   - 模糊匹配店铺名称
-
-3. **评论管理**
-   - 新增删除评论功能
-   - 删除后自动更新店铺评分和评论数
-
-4. **数据一致性**
-   - 添加评论自动更新店铺评分
-   - 删除评论自动同步店铺数据
-
-### 数据库升级 (V1 -> V2)
-
-如果从 V1 升级，需执行 `sql/v2_upgrade.sql`：
+启动后端前可配置：
 
 ```bash
-mysql -u root -p fooddb < sql/v2_upgrade.sql
+export TENCENT_MAP_ENABLED=true
+export TENCENT_MAP_KEY=你的腾讯地图WebServiceKey
 ```
 
-## V3 计划功能
+后端配置入口在 [src/main/resources/application.yml](/Users/makebukepurou/Desktop/food_wx-1/src/main/resources/application.yml)：
 
-- [ ] 推荐算法集成
-- [ ] Redis 缓存
-- [ ] JWT 鉴权
-- [ ] 评价图片上传
-- [ ] 距离计算
+```yaml
+tencent:
+  map:
+    enabled: ${TENCENT_MAP_ENABLED:false}
+    key: ${TENCENT_MAP_KEY:}
+    base-url: ${TENCENT_MAP_BASE_URL:https://apis.map.qq.com}
+```
 
-## 注意事项
+说明：
 
-- 所有 Controller 已添加 `@CrossOrigin` 注解，支持微信小程序跨域请求
-- 推荐使用 MySQL 8.0+ 以支持 `utf8mb4` 字符集
-- 评分保留一位小数，范围 0-5
+- 没配置 `TENCENT_MAP_KEY` 时，会自动回退到原有贝叶斯推荐流程
+- 配好 Key 后，会额外叠加附近餐饮 POI 命中度和更可信的位置权重
+
+### 7. 配置微信小程序登录
+
+项目已接入微信小程序登录，链路为：
+
+- 小程序端调用 `wx.login`
+- 后端调用微信 `code2Session`
+- 用返回的 `openid` 查找或创建本地用户
+
+启动后端前需要配置：
+
+```bash
+export WECHAT_MINI_APP_ID=你的小程序AppID
+export WECHAT_MINI_APP_SECRET=你的小程序AppSecret
+```
+
+对应配置项在 [src/main/resources/application.yml](/Users/makebukepurou/Desktop/food_wx-1/src/main/resources/application.yml)：
+
+```yaml
+wechat:
+  mini-program:
+    app-id: ${WECHAT_MINI_APP_ID:wxa39950b899a41ebd}
+    secret: ${WECHAT_MINI_APP_SECRET:}
+```
+
+说明：
+
+- `AppID` 可以和 [project.config.json](/Users/makebukepurou/Desktop/food_wx-1/project.config.json) 保持一致
+- `AppSecret` 需要去微信公众平台获取，不能写死在小程序前端
+- 小程序登录身份来自 `wx.login -> code2Session -> openid`
+- 用户头像与昵称建议使用小程序官方授权控件完成补全
+
+## 已完成功能
+
+- 首页推荐列表
+- 分类浏览
+- 搜索店铺
+- 店铺详情展示
+- 收藏 / 取消收藏
+- 发布评论
+- 我的收藏
+- 我的评论
+
+## 本次已完成的 UI 优化
+
+- 统一全局色板、圆角、阴影、留白和按钮风格
+- 重做首页 Hero 区与推荐卡片层级
+- 优化详情页封面、摘要区和底部操作栏
+- 搜索页、分类页、个人中心、评论页统一现代化风格
+- 修复 `myreviews.wxml` 末尾残留测试文本
+- 调整全局导航栏与 tabBar 颜色，和新视觉保持一致
+
+## 已验证事项
+
+- `mvn -q -DskipTests package` 可通过
+- 后端可在本地 `mysql` 上启动并响应推荐接口
+
+## 当前待处理事项
+
+- 启动本地 MySQL，让 Spring Boot 接口真正跑起来
+- 在微信开发者工具中手动确认开启 CLI 服务端口
+- 完成一次开发者工具真机或模拟器联调
+
+## 建议的下一步
+
+1. 先启动 MySQL
+2. 再运行 `mvn spring-boot:run`
+3. 然后在微信开发者工具里打开项目
+4. 最后用首页、搜索、详情、收藏、评论链路做一遍完整联调

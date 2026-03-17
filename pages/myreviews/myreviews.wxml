@@ -1,0 +1,50 @@
+<!-- pages/myreviews/myreviews.wxml - 我的评论 -->
+<view class="page">
+  <view wx:if="{{loading}}" class="state">
+    <view class="spinner"></view>
+    <text class="state-text">加载中...</text>
+  </view>
+
+  <view wx:elif="{{errorMsg}}" class="state">
+    <text class="state-text">{{errorMsg}}</text>
+  </view>
+
+  <view wx:elif="{{reviews.length === 0}}" class="state">
+    <text class="state-text">暂无评论</text>
+  </view>
+
+  <scroll-view wx:else scroll-y="true" class="list">
+    <view
+      class="item"
+      wx:for="{{reviews}}"
+      wx:key="id"
+      data-shop-id="{{item.shopId}}"
+      bindtap="onGoDetail"
+    >
+      <view class="top">
+        <text class="shop-name">{{item.shopName || ('店铺ID：' + item.shopId)}}</text>
+        <view class="rating">
+          <text
+            class="star"
+            wx:for="{{stars}}"
+            wx:for-item="star"
+            wx:key="star"
+          >{{star <= item.rating ? '★' : '☆'}}</text>
+        </view>
+      </view>
+      <view class="review-meta">
+        <image class="shop-cover" src="{{item.shopCoverImage}}" mode="aspectFill"></image>
+        <text class="review-author">{{item.nickname}}</text>
+      </view>
+      <view class="content">
+        <text>{{item.content}}</text>
+      </view>
+      <view class="foot">
+        <view class="time" wx:if="{{item.createdAt}}">
+          <text>{{item.createdAt}}</text>
+        </view>
+        <view class="delete-btn" data-id="{{item.id}}" catchtap="onDeleteReview">删除</view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

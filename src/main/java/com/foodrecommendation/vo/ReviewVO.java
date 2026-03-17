@@ -20,6 +20,8 @@ public class ReviewVO {
     private Integer rating;
     private String content;
     private LocalDateTime createdAt;
+    private String shopName;
+    private String shopCoverImage;
 
     /**
      * 评论用户昵称

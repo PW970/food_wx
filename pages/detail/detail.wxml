@@ -1,0 +1,131 @@
+<!-- pages/detail/detail.wxml - 店铺详情页 -->
+<view class="page">
+  <!-- 顶部封面 -->
+  <view class="cover">
+    <image class="cover-img" src="{{shop.coverImage}}" mode="aspectFill" lazy-load="true"></image>
+    <view class="cover-mask"></view>
+    <view class="cover-title">
+      <view class="cover-chip">店铺详情</view>
+      <text class="shop-name">{{shop.name}}</text>
+      <view class="shop-sub">
+        <text class="star">★</text>
+        <text class="score">{{shop.score}}</text>
+        <text class="dot">·</text>
+        <text class="category">{{shop.categoryName}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载/错误 -->
+  <view wx:if="{{loading && !shop}}" class="state">
+    <view class="spinner"></view>
+    <text class="state-text">加载中...</text>
+  </view>
+
+  <view wx:elif="{{errorMsg}}" class="state">
+    <text class="state-text">{{errorMsg}}</text>
+    <view class="state-btn" bindtap="onRetry">重试</view>
+  </view>
+
+  <!-- 内容 -->
+  <view wx:else class="content">
+    <view class="summary-card">
+      <view class="summary-item">
+        <text class="summary-label">评分</text>
+        <text class="summary-value">{{shop.score}}</text>
+      </view>
+      <view class="summary-item">
+        <text class="summary-label">分类</text>
+        <text class="summary-value">{{shop.categoryName}}</text>
+      </view>
+      <view class="summary-item" wx:if="{{shop.perCapita}}">
+        <text class="summary-label">人均</text>
+        <text class="summary-value">¥{{shop.perCapita}}</text>
+      </view>
+    </view>
+
+    <!-- 基本信息 -->
+    <view class="card">
+      <view class="info-row">
+        <text class="info-label">地址</text>
+        <text class="info-value">{{shop.address}}</text>
+      </view>
+      <view class="info-row" wx:if="{{shop.phone}}">
+        <text class="info-label">电话</text>
+        <text class="info-value">{{shop.phone}}</text>
+      </view>
+      <view class="info-row" wx:if="{{shop.businessHours}}">
+        <text class="info-label">营业时间</text>
+        <text class="info-value">{{shop.businessHours}}</text>
+      </view>
+      <view class="info-row" wx:if="{{shop.perCapita}}">
+        <text class="info-label">人均</text>
+        <text class="info-value">¥{{shop.perCapita}}</text>
+      </view>
+      <view class="desc" wx:if="{{shop.description}}">
+        <text class="desc-title">简介</text>
+        <text class="desc-text">{{shop.description}}</text>
+      </view>
+    </view>
+
+    <!-- 标签 -->
+    <view class="card" wx:if="{{shop.tags.length > 0}}">
+      <view class="section-title">风味标签</view>
+      <view class="tags">
+        <view class="tag" wx:for="{{shop.tags}}" wx:key="index">
+          <text>{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 评论 -->
+    <view class="card">
+      <view class="section-head">
+        <text class="section-title">评论</text>
+        <text class="section-sub" wx:if="{{reviews.length > 0}}">{{reviews.length}} 条</text>
+      </view>
+
+      <view wx:if="{{reviewsLoading}}" class="reviews-state">
+        <view class="mini-spinner"></view>
+        <text class="reviews-state-text">加载评论中...</text>
+      </view>
+
+      <view wx:elif="{{reviews.length === 0}}" class="reviews-empty">
+        <text class="reviews-empty-text">还没有评论，来抢沙发吧</text>
+      </view>
+
+      <view wx:else class="reviews">
+        <view class="review-item" wx:for="{{reviews}}" wx:key="id">
+          <image class="avatar" src="{{item.avatar}}" mode="aspectFill"></image>
+          <view class="review-main">
+            <view class="review-top">
+              <text class="nickname">{{item.nickname}}</text>
+              <view class="rating">
+                <text
+                  class="r-star"
+                  wx:for="{{stars}}"
+                  wx:for-item="star"
+                  wx:key="star"
+                >{{star <= item.rating ? '★' : '☆'}}</text>
+              </view>
+            </view>
+            <text class="review-content">{{item.content}}</text>
+            <text class="review-time" wx:if="{{item.createdAt}}">{{item.createdAt}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar" wx:if="{{shop}}">
+    <view class="btn collect {{shop.isCollected ? 'collected' : ''}}" bindtap="onToggleCollect">
+      <text>{{shop.isCollected ? '已收藏' : '收藏'}}</text>
+    </view>
+    <view class="btn review" bindtap="onGoReview">
+      <text>去评论</text>
+    </view>
+  </view>
+
+  <view class="bottom-safe"></view>
+</view>

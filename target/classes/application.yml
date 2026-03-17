@@ -1,5 +1,10 @@
 server:
   port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force-response: true
 
 spring:
   application:
@@ -23,3 +28,15 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+
+tencent:
+  map:
+    enabled: ${TENCENT_MAP_ENABLED:true}
+    key: ${TENCENT_MAP_KEY:VC6BZ-HZBL3-6PQ37-OMPSG-U7TLQ-Z6FHW}
+    base-url: ${TENCENT_MAP_BASE_URL:https://apis.map.qq.com}
+
+wechat:
+  mini-program:
+    app-id: ${WECHAT_MINI_APP_ID:wxa39950b899a41ebd}
+    secret: ${WECHAT_MINI_APP_SECRET:}
+    code2session-url: ${WECHAT_CODE2SESSION_URL:https://api.weixin.qq.com/sns/jscode2session}

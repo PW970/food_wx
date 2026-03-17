@@ -1,0 +1,172 @@
+/* pages/category/category.wxss */
+
+.page {
+  min-height: 100vh;
+  padding: 24rpx;
+}
+
+.state {
+  padding: 120rpx 0;
+  text-align: center;
+}
+
+.state-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.layout {
+  display: flex;
+  height: calc(100vh - 48rpx);
+  gap: 18rpx;
+}
+
+.category-nav {
+  width: 212rpx;
+  padding: 24rpx 0;
+  background: rgba(255, 253, 249, 0.92);
+  border-radius: 28rpx;
+  box-shadow: 0 18rpx 48rpx rgba(73, 52, 35, 0.08);
+}
+
+.nav-title {
+  padding: 0 22rpx 18rpx;
+  font-size: 24rpx;
+  color: #98a090;
+}
+
+.category-item {
+  margin: 0 12rpx 10rpx;
+  padding: 22rpx 16rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #667063;
+  border-radius: 20rpx;
+}
+
+.category-item.active {
+  background: #fff1e8;
+  color: #c95f2a;
+  font-weight: 700;
+}
+
+.category-name {
+  display: block;
+}
+
+.shop-panel {
+  flex: 1;
+  padding: 6rpx 0 6rpx;
+  box-sizing: border-box;
+}
+
+.shop-state {
+  padding: 80rpx 0;
+  text-align: center;
+  color: #999;
+}
+
+.spinner {
+  width: 52rpx;
+  height: 52rpx;
+  border: 4rpx solid rgba(31, 37, 32, 0.08);
+  border-top-color: #dd6b2f;
+  border-radius: 50%;
+  margin: 0 auto 16rpx;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.shop-state-text {
+  font-size: 26rpx;
+  color: #667063;
+}
+
+.shop-list {
+  height: 100%;
+}
+
+.shop-card {
+  display: flex;
+  background: rgba(255, 253, 249, 0.92);
+  border-radius: 26rpx;
+  overflow: hidden;
+  margin-bottom: 18rpx;
+  box-shadow: 0 16rpx 40rpx rgba(73, 52, 35, 0.08);
+}
+
+.shop-cover {
+  width: 220rpx;
+  height: 190rpx;
+  background: #eee;
+}
+
+.shop-info {
+  flex: 1;
+  padding: 20rpx;
+}
+
+.shop-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shop-name {
+  flex: 1;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2520;
+  margin-right: 12rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.shop-score {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: #fff1e8;
+}
+
+.shop-score .star {
+  font-size: 22rpx;
+  margin-right: 4rpx;
+  color: #dd6b2f;
+}
+
+.shop-score .score {
+  font-size: 24rpx;
+  color: #dd6b2f;
+  font-weight: 700;
+}
+
+.shop-meta {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #667063;
+}
+
+.shop-meta .category {
+  margin-right: 12rpx;
+}
+
+.shop-meta .per {
+  color: #c95f2a;
+}
+
+.shop-address {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #98a090;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

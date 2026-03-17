@@ -27,7 +27,7 @@ public class CollectionController {
      * @param userId 用户ID
      * @return 店铺VO列表
      */
-    @GetMapping
+    @GetMapping("")
     public Result<List<ShopVO>> getCollectionsByUserId(@RequestParam Long userId) {
         List<ShopVO> shops = collectionService.getShopVOsByUserId(userId);
         return Result.success(shops);

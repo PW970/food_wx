@@ -1,0 +1,118 @@
+<!-- pages/home/home.wxml - 首页结构 -->
+<view class="home-container">
+  <view class="hero">
+    <view class="hero-badge">今日灵感</view>
+    <view class="hero-title">发现附近值得一试的好味道</view>
+    <view class="hero-subtitle">用更轻松的方式找到适合当下心情的餐厅</view>
+
+    <view class="hero-actions">
+      <view class="map-entry" bindtap="onMapTap">
+        <text class="map-entry-label">地图查看</text>
+        <text class="map-entry-subtext">在地图上探索附近推荐</text>
+      </view>
+    </view>
+
+    <view class="search-bar" bindtap="onSearchTap">
+      <view class="search-icon">
+        <text class="iconfont">🔍</text>
+      </view>
+      <view class="search-input">{{searchPlaceholder}}</view>
+      <view class="search-action">搜索</view>
+    </view>
+  </view>
+
+  <!-- 加载中状态 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <view class="loading-text">正在加载推荐...</view>
+  </view>
+
+  <!-- 错误状态 -->
+  <view class="error-container" wx:elif="{{errorMsg && !loading}}">
+    <view class="error-icon">⚠️</view>
+    <view class="error-text">{{errorMsg}}</view>
+    <view class="retry-btn" bindtap="onRetry">重新加载</view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-container" wx:elif="{{isEmpty && !loading}}">
+    <view class="empty-icon">🍽️</view>
+    <view class="empty-text">暂无推荐店铺</view>
+    <view class="empty-subtext">换个位置试试看</view>
+  </view>
+
+  <!-- 推荐店铺列表 -->
+  <view class="shop-list" wx:else>
+    <view class="list-header">
+      <view>
+        <text class="list-title">为你推荐</text>
+        <text class="list-subtitle">基于你的位置和口味精选</text>
+      </view>
+      <view class="list-badge">10 家以内</view>
+    </view>
+
+    <view
+      class="shop-card"
+      wx:for="{{shops}}"
+      wx:key="shopId"
+      data-shop-id="{{item.shopId}}"
+      bindtap="onShopTap"
+    >
+      <!-- 封面图片 -->
+      <view class="shop-cover">
+        <image
+          class="cover-image"
+          src="{{item.coverImage}}"
+          mode="aspectFill"
+          lazy-load="true"
+        ></image>
+        <view class="cover-overlay"></view>
+        <view class="recommend-tag">
+          <text>推荐理由</text>
+        </view>
+        <view class="cover-meta">
+          <text class="cover-category">{{item.categoryName}}</text>
+          <text class="cover-distance">{{item.distance}}</text>
+        </view>
+      </view>
+
+      <!-- 店铺信息 -->
+      <view class="shop-info">
+        <view class="shop-header">
+          <text class="shop-name">{{item.shopName}}</text>
+          <view class="shop-score">
+            <text class="score-star">★</text>
+            <text class="score-value">{{item.score}}</text>
+          </view>
+        </view>
+
+        <view class="recommend-copy">
+          <text>{{item.recommendReason}}</text>
+        </view>
+
+        <view class="shop-meta">
+          <view class="meta-item">
+            <text class="meta-icon">位置</text>
+            <text class="meta-text">{{item.distance}}</text>
+          </view>
+          <view class="meta-item">
+            <text class="meta-icon">分类</text>
+            <text class="meta-text">{{item.categoryName}}</text>
+          </view>
+        </view>
+
+        <!-- 标签列表 -->
+        <view class="shop-tags" wx:if="{{item.tags.length > 0}}">
+          <view
+            class="tag-item"
+            wx:for="{{item.tags}}"
+            wx:for-item="tag"
+            wx:key="index"
+          >
+            <text>{{tag}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,46 @@
+<!-- pages/review/review.wxml - 发布评论页 -->
+<view class="page">
+  <view class="intro-card">
+    <text class="intro-title">分享这次用餐体验</text>
+    <text class="intro-subtitle">真实、简洁的评价能帮别人更快找到合适的餐厅。</text>
+  </view>
+
+  <view class="card">
+    <view class="title">评分</view>
+    <view class="stars">
+      <view
+        class="star-item"
+        wx:for="{{stars}}"
+        wx:for-item="star"
+        wx:key="star"
+        data-value="{{star}}"
+        bindtap="onSelectRating"
+      >
+        <text class="star {{star <= rating ? 'active' : ''}}">★</text>
+      </view>
+      <text class="rating-text" wx:if="{{rating > 0}}">{{rating}} 星</text>
+      <text class="rating-text muted" wx:else>请选择</text>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="title">评论内容</view>
+    <textarea
+      class="textarea"
+      placeholder="说说你的真实体验吧（环境、口味、服务…）"
+      maxlength="300"
+      value="{{content}}"
+      bindinput="onContentInput"
+      auto-height="true"
+    ></textarea>
+    <view class="counter">
+      <text>{{content.length}} / 300</text>
+    </view>
+  </view>
+
+  <view class="submit-wrap">
+    <view class="submit-btn {{submitting ? 'disabled' : ''}}" bindtap="onSubmit">
+      <text>{{submitting ? '提交中...' : '发布评论'}}</text>
+    </view>
+  </view>
+</view>

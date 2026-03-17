@@ -1,0 +1,80 @@
+<!-- pages/search/search.wxml - 搜索页 -->
+<view class="page">
+  <view class="search-shell">
+    <view class="page-head">
+      <text class="page-title">搜索美食</text>
+      <text class="page-subtitle">输入店名、分类或你想吃的口味</text>
+    </view>
+
+    <view class="search-bar">
+      <view class="search-input-wrap">
+        <text class="search-prefix">🔎</text>
+        <input
+          class="search-input"
+          placeholder="搜索美食、店铺..."
+          value="{{keyword}}"
+          confirm-type="search"
+          bindinput="onKeywordInput"
+          bindconfirm="onSearch"
+        />
+        <view wx:if="{{keyword}}" class="clear" bindtap="onClearKeyword">×</view>
+      </view>
+      <view class="search-btn" bindtap="onSearch">搜索</view>
+    </view>
+  </view>
+
+  <!-- 状态 -->
+  <view wx:if="{{loading}}" class="state">
+    <view class="spinner"></view>
+    <text class="state-text">搜索中...</text>
+  </view>
+
+  <view wx:elif="{{errorMsg}}" class="state">
+    <text class="state-text">{{errorMsg}}</text>
+  </view>
+
+  <view wx:elif="{{hasSearched && results.length === 0}}" class="state">
+    <text class="state-text">未找到相关店铺</text>
+  </view>
+
+  <!-- 结果列表 -->
+  <scroll-view wx:else scroll-y="true" class="list">
+    <view
+      class="card"
+      wx:for="{{results}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onResultTap"
+    >
+      <view class="thumb">
+        <image class="thumb-img" src="{{item.coverImage}}" mode="aspectFill"></image>
+        <view class="thumb-tag">{{item.categoryName}}</view>
+      </view>
+      <view class="info">
+        <view class="row-top">
+          <text class="name">{{item.name}}</text>
+          <view class="score-wrap">
+            <text class="star">★</text>
+            <text class="score">{{item.score}}</text>
+          </view>
+        </view>
+        <view class="row-mid">
+          <text class="category">{{item.categoryName}}</text>
+          <text wx:if="{{item.perCapita}}" class="per-capita">人均 ¥{{item.perCapita}}</text>
+        </view>
+        <view wx:if="{{item.address}}" class="address">
+          <text>{{item.address}}</text>
+        </view>
+        <view wx:if="{{item.tags.length > 0}}" class="tags">
+          <view
+            class="tag"
+            wx:for="{{item.tags}}"
+            wx:key="index"
+          >
+            <text>{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

@@ -1,0 +1,50 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/map/map",
+    "pages/search/search",
+    "pages/detail/detail",
+    "pages/review/review",
+    "pages/category/category",
+    "pages/profile/profile",
+    "pages/favorites/favorites",
+    "pages/myreviews/myreviews"
+  ],
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于展示你附近的推荐店铺和交互地图"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#fbf7f1",
+    "navigationBarTitleText": "本地美食推荐",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#8f9688",
+    "selectedColor": "#dd6b2f",
+    "backgroundColor": "#fffdf9",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/category/category",
+        "text": "分类"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

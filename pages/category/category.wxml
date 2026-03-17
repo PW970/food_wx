@@ -1,0 +1,66 @@
+<!-- pages/category/category.wxml - 分类页 -->
+<view class="page">
+  <view wx:if="{{errorMsg}}" class="state">
+    <text class="state-text">{{errorMsg}}</text>
+  </view>
+
+  <view wx:else class="layout">
+    <!-- 左侧分类 -->
+    <scroll-view scroll-y="true" class="category-nav">
+      <view class="nav-title">分类</view>
+      <view
+        class="category-item {{item.id === activeCategoryId ? 'active' : ''}}"
+        wx:for="{{categories}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="onCategoryTap"
+      >
+        <text class="category-name">{{item.name}}</text>
+      </view>
+    </scroll-view>
+
+    <!-- 右侧店铺 -->
+    <view class="shop-panel">
+      <view wx:if="{{loadingShops}}" class="shop-state">
+        <view class="spinner"></view>
+        <text class="shop-state-text">加载中...</text>
+      </view>
+
+      <view wx:elif="{{shopErrorMsg}}" class="shop-state">
+        <text class="shop-state-text">{{shopErrorMsg}}</text>
+      </view>
+
+      <view wx:elif="{{shops.length === 0}}" class="shop-state">
+        <text class="shop-state-text">该分类暂无店铺</text>
+      </view>
+
+      <scroll-view wx:else scroll-y="true" class="shop-list">
+        <view
+          class="shop-card"
+          wx:for="{{shops}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="onShopTap"
+        >
+          <image class="shop-cover" src="{{item.coverImage}}" mode="aspectFill"></image>
+          <view class="shop-info">
+            <view class="shop-title-row">
+              <text class="shop-name">{{item.name}}</text>
+              <view class="shop-score">
+                <text class="star">★</text>
+                <text class="score">{{item.score}}</text>
+              </view>
+            </view>
+            <view class="shop-meta">
+              <text class="category">{{item.categoryName}}</text>
+              <text wx:if="{{item.perCapita}}" class="per">人均 ¥{{item.perCapita}}</text>
+            </view>
+            <view wx:if="{{item.address}}" class="shop-address">
+              <text>{{item.address}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

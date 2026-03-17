@@ -1,0 +1,68 @@
+<!-- pages/profile/profile.wxml - 我的页面 -->
+<view class="page">
+  <view class="user-card">
+    <view class="user-top">
+      <image class="avatar" src="{{avatar}}" mode="aspectFill"></image>
+      <view class="info">
+        <text class="name">{{nickname}}</text>
+        <text class="uid">{{userId ? ('用户ID：' + userId) : '微信账号未登录'}}</text>
+      </view>
+    </view>
+    <view class="profile-note">把喜欢的店铺和真实体验都留在这里，随时回看。</view>
+    <view class="login-row">
+      <button class="login-btn" bindtap="onWechatLoginTap">{{loginReady ? '重新获取登录态' : '微信登录'}}</button>
+      <text wx:if="{{loginError}}" class="login-error">{{loginError}}</text>
+    </view>
+    <view wx:if="{{showProfileAuth}}" class="auth-card">
+      <text class="auth-title">完善微信授权资料</text>
+      <text class="auth-desc">请使用微信官方头像与昵称授权方式完成资料补全。</text>
+      <button class="avatar-picker" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image class="avatar-preview" src="{{draftAvatar || avatar}}" mode="aspectFill"></image>
+        <text class="avatar-copy">选择微信头像</text>
+      </button>
+      <input
+        class="nickname-input"
+        type="nickname"
+        placeholder="请输入微信昵称"
+        value="{{draftNickname}}"
+        bindinput="onNicknameInput"
+      />
+      <button class="auth-submit" bindtap="onSubmitWechatProfile" loading="{{profileSubmitting}}">
+        保存授权资料
+      </button>
+    </view>
+  </view>
+
+  <view class="section-head">
+    <text class="section-title">个人中心</text>
+    <text class="section-subtitle">收藏与评论一目了然</text>
+  </view>
+
+  <view class="menu">
+    <view class="menu-item" bindtap="onFavoritesTap">
+      <view class="menu-left">
+        <view class="icon-wrap">
+          <text class="icon">★</text>
+        </view>
+        <view class="menu-copy">
+          <text class="title">我的收藏</text>
+          <text class="desc">保存想再去一次的好店</text>
+        </view>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+
+    <view class="menu-item" bindtap="onMyReviewsTap">
+      <view class="menu-left">
+        <view class="icon-wrap alt">
+          <text class="icon">✎</text>
+        </view>
+        <view class="menu-copy">
+          <text class="title">我的评论</text>
+          <text class="desc">查看自己发布过的用餐反馈</text>
+        </view>
+      </view>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,153 @@
+/* pages/favorites/favorites.wxss */
+
+.page {
+  min-height: 100vh;
+  padding: 24rpx;
+}
+
+.state {
+  padding: 120rpx 0;
+  text-align: center;
+}
+
+.state-text {
+  font-size: 28rpx;
+  color: #98a090;
+}
+
+.spinner {
+  width: 52rpx;
+  height: 52rpx;
+  border: 4rpx solid rgba(31, 37, 32, 0.08);
+  border-top-color: #dd6b2f;
+  border-radius: 50%;
+  margin: 0 auto 16rpx;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.list {
+  height: calc(100vh - 48rpx);
+  padding-bottom: 10rpx;
+  box-sizing: border-box;
+}
+
+.card {
+  display: flex;
+  background: rgba(255, 253, 249, 0.92);
+  border-radius: 26rpx;
+  overflow: hidden;
+  margin-bottom: 18rpx;
+  box-shadow: 0 16rpx 40rpx rgba(73, 52, 35, 0.08);
+}
+
+.cover {
+  width: 220rpx;
+  height: 190rpx;
+  background: #eee;
+}
+
+.info {
+  flex: 1;
+  padding: 20rpx;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.name {
+  flex: 1;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2520;
+  margin-right: 12rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.score-wrap {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: #fff1e8;
+}
+
+.star {
+  font-size: 22rpx;
+  margin-right: 4rpx;
+  color: #dd6b2f;
+}
+
+.score {
+  font-size: 24rpx;
+  color: #dd6b2f;
+  font-weight: 700;
+}
+
+.mid {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #667063;
+}
+
+.category {
+  margin-right: 12rpx;
+}
+
+.per {
+  color: #c95f2a;
+}
+
+.address {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #98a090;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 12rpx;
+}
+
+.tag {
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: #f7f3ec;
+  color: #7a6755;
+  font-size: 21rpx;
+}
+
+.bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16rpx;
+}
+
+.collected-time {
+  font-size: 22rpx;
+  color: #98a090;
+}
+
+.cancel-btn {
+  padding: 12rpx 18rpx;
+  border-radius: 999rpx;
+  background: #fff1e8;
+  color: #c95f2a;
+  font-size: 22rpx;
+}
